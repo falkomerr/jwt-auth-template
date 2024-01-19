@@ -1,4 +1,9 @@
-import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as argon from 'argon2';
 import { PrismaService } from '../prisma/prisma.service';
@@ -16,7 +21,7 @@ export class AuthService {
     });
 
     if (existedUser) {
-      throw new BadRequestException('User already registered');
+      throw new BadRequestException('User with same credentials already exists');
     }
     const hash = await argon.hash(dto.password);
 
@@ -45,13 +50,13 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new ForbiddenException('Invalid credentials');
+      throw new NotFoundException('Invalid credentials');
     }
 
     const verifyPassword = await argon.verify(user.hash, dto.password);
 
     if (!verifyPassword) {
-      throw new ForbiddenException('Invalid password');
+      throw new UnauthorizedException('Invalid password');
     }
 
     const refreshToken = await this.generateRefresh(user.id);

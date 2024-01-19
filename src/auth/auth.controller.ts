@@ -9,14 +9,18 @@ import {
   Res,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
   @HttpCode(HttpStatus.OK)
+  @ApiResponse({ status: 400, description: 'User with same credentials already exists' })
+  @ApiResponse({ status: 200, description: 'User successfully registered' })
   @Post('signup')
   async signup(@Body() dto: AuthDto, @Res({ passthrough: true }) res) {
     const data = await this.authService.signup(dto);
@@ -32,6 +36,9 @@ export class AuthController {
   }
 
   @HttpCode(HttpStatus.OK)
+  @ApiResponse({ status: 404, description: 'User with same credentials not found' })
+  @ApiResponse({ status: 401, description: 'Invalid password' })
+  @ApiResponse({ status: 200, description: 'Login success' })
   @Post('signin')
   async signin(@Body() dto: AuthDto, @Res({ passthrough: true }) res) {
     const data = await this.authService.signin(dto);
@@ -45,7 +52,8 @@ export class AuthController {
       accessToken: data.accessToken,
     };
   }
-
+  @ApiResponse({ status: 401, description: "The refreshToken doesn't provided" })
+  @ApiResponse({ status: 200, description: 'Refreshed tokens success' })
   @Get('/refreshToken')
   async refreshToken(@Req() req, @Res({ passthrough: true }) res) {
     const refresh: string = req.cookies['refreshToken'];
@@ -66,6 +74,8 @@ export class AuthController {
     };
   }
 
+  @ApiResponse({ status: 200, description: 'Logout success' })
+  @ApiResponse({ status: 401, description: "refreshToken doesn't provided" })
   @HttpCode(HttpStatus.OK)
   @Get('/logout')
   async logOut(@Res({ passthrough: true }) res, @Req() req) {
