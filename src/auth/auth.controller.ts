@@ -10,13 +10,14 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private prisma: PrismaService) {}
 
   @HttpCode(HttpStatus.OK)
   @ApiResponse({ status: 400, description: 'User with same credentials already exists' })
@@ -65,11 +66,21 @@ export class AuthController {
     const { accessToken, id } = await this.authService.generateAccess(refresh);
     const newRefresh = await this.authService.generateRefresh(id);
 
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: id,
+      },
+    });
+
     res.cookie('refreshToken', newRefresh, {
       httpOnly: true,
     });
 
     return {
+      user: {
+        email: user.email,
+        id: user.id,
+      },
       accessToken: accessToken,
     };
   }
