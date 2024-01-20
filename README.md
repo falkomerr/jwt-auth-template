@@ -24,9 +24,10 @@
 
 # Fork
 
-To start working with template you need to create an **.env** file in the project root with the following variables:
+- To start working with template you need to create an **.env** file in the project root with the following variables:
 
-1.  DATABASE_URL=
-    > This is the URL where you will connect to your database (for this template you need to use postgresQL)
-2.  JWT_SECRET=
-    > This is a secret string that is used to sign JWT tokens
+  I.  DATABASE_URL=
+      > This is the URL where you will connect to your database (for this template you need to use postgresQL)<br/>
+  II.  JWT_SECRET=
+      > This is a secret string that is used to sign JWT tokens
+- After that, you can go to **http://localhost:9999/api** and browse availble endpoints
